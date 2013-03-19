@@ -15,7 +15,7 @@ May be distributed under the MIT license
 	background: white;
 	font-size: 20px;
 	line-height: 1.65;
-	height: 250px;
+	height: 300px;
 }
 .DocEditable .CodeMirror-linewidget {
 	overflow: visible;
