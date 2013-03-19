@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>DocEditable</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/codemirror.css" rel="stylesheet">
+    <link href="css/doceditable.css" rel="stylesheet">
+    <link href="css/doc.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href=".">Home</a></li>
+          <li><a href="doc/">Documentation</a></li>
+          <li><a href="demos/">Demos</a></li>
+          <li><a href="test/">Tests</a></li>
+          <li><a href="https://github.com/Foliotek/DocEditable">Github</a></li>
+        </ul>
+        <h1 class="muted">DocEditable</h1>
+      </div>
+
+      <hr>
+
+        <p class="lead">
+          Clean WYSIWYG editing in your browser.
+        </p>
+      <div class="row-fluid marketing">
+        <div class="span12">
+
+<textarea id="code" name="code">
+<h1>Robert Leroy Johnson</h1>
+<strong>Robert Leroy Johnson</strong> (May 8, 1911 – August 16, 1938) was an American blues singer and musician. His landmark recordings from 1936–37 display a combination of singing, guitar skills, and songwriting talent that has influenced later generations of musicians. 
+
+Johnson's shadowy, poorly documented life and death at age 27 have <u>given rise to much legend</u>, including the Faustian myth that he sold his soul at a crossroads to achieve success. As an itinerant performer who played mostly on street corners, in juke joints, and at Saturday night dances, Johnson had little commercial success or public recognition in his lifetime.
+
+Johnson's records sold poorly during his lifetime. It was only after the reissue of his recordings in 1961 on the LP King of the Delta Blues Singers that his work reached a wider audience. Johnson is now recognized as a master of the blues, particularly of the Mississippi Delta blues style. He is credited by many rock musicians as an important influence; Eric Clapton has called Johnson "the most important blues singer that ever lived."<em>[1]</em><em>[2]</em> Johnson was inducted into the Rock and Roll Hall of Fame as an "Early Influence" in their first induction ceremony in 1986.<em>[3]</em> In 2003, David Fricke ranked Johnson fifth in Rolling Stone's list of the 100 Greatest Guitarists of All Time.<em>[4]</em>
+</textarea>
+
+        </div>
+
+      </div>
+
+      <hr>
+
+      <div id="output-wrapper">
+        <h4>Output:</h4>
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#output-source-wrapper">Source</a></li>
+          <li><a href="#output-design">Design</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="output-source-wrapper" class="tab-pane active">
+            <textarea id="output-source"></textarea>
+          </div>
+          <div id="output-design" class="tab-pane"></div>
+        </div>
+      </div>
+<hr />
+
+    </div> <!-- /container -->
+
+    <script src="js/jquery-1.9.1.js"></script>
+    <script src="js/markdown.js"></script>
+    <script src="js/codemirror.js"></script>
+    <script src="js/doceditable.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Documentation - DocEditable</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <link href="../css/codemirror.css" rel="stylesheet">
+    <link href="../css/doceditable.css" rel="stylesheet">
+    <link href="../css/doc.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="../">Home</a></li>
+          <li class="active"><a href=".">Documentation</a></li>
+          <li><a href="../test/">Tests</a></li>
+          <li><a href="../">Github</a></li>
+        </ul>
+        <h1 class="muted">DocEditable</h1>
+      </div>
+
+      <hr>
+
+      <h2>Documentation</h2>
+
+      <p>
+        Note: <strong>DocEditable is in an early stage of development</strong>.  Right now there may be some things that don't work, and the API may be changing.  Please contribute if you'd like to help out.  Send me an email at brian@foliotek.com or open an issue over at <a href='https://github.com/Foliotek/DocEditable/issues'>https://github.com/Foliotek/DocEditable/issues</a> if you'd like to help!
+      </p>
+
+
+      <h3>The Markup</h3>
+
+      <p>
+        This is the bare minimum you need to get started.  <a style='display:none;' href='#'>See an example of this online</a>
+      </p>
+<pre class="prettyprint language-html">
+&lt;head&gt;
+  &lt;link href=&quot;../css/bootstrap.css&quot; rel=&quot;stylesheet&quot;&gt;
+  &lt;link href=&quot;../css/codemirror.css&quot; rel=&quot;stylesheet&quot;&gt;
+  &lt;link href=&quot;../css/doceditable.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;textarea id=&quot;doc&quot;&gt;Lorem Ipsum&lt;/textarea&gt;
+
+  &lt;script src=&quot;../js/jquery-1.9.1.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;../js/codemirror.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;../js/doceditable.js&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+</pre>
+
+<pre class="prettyprint language-html">
+  &lt;script&gt;
+  var docEditable = DocEditable.fromTextArea(document.getElementById("doc") /*, options */ );
+  &lt;/script&gt;
+</pre>
+
+
+      <h3>Initialization</h3>
+      <p>
+        You can create DocEditable with a container element (just as in <a href='http://codemirror.net/doc/manual.html'>CodeMirror</a>).
+      </p>
+
+<pre class="prettyprint language-js">
+var docEditable1 = DocEditable(document.getElementById("container"), options);
+</pre>
+
+      <p>
+        Or you can use a helper <code>fromTextArea</code> function, which is a nice shortcut that will copy the changed values back into the textarea as changes happen.
+      </p>
+
+<pre class="prettyprint language-js">
+var docEditable2 = DocEditable.fromTextArea(document.getElementById("doc"), options);
+</pre>
+
+      <p>
+        If you want to use custom CodeMirror options you can create the CodeMirror first then pass it in to the constructor:
+      </p>
+
+<pre class="prettyprint language-js">
+var myCodeMirror = CodeMirror(document.body, {
+  value: "function myScript(){return 100;}\n",
+  mode:  "javascript"
+});
+var docEditable3 = DocEditable(myCodeMirror, options);
+</pre>
+
+      <h3>Options</h3>
+  
+      <div class="row-fluid marketing">
+        <div class="span12">
+
+        <h4>Todo:</h4>
+        <ul>
+          <li>Implement range splitting and merging for inline styles</li>
+          <li>toHtml, fromHtml, toMarkdown, fromMarkdown</li>
+          <li>Write some basic tests to check API and basic I/O</li>
+          <li>Annotations!  Not sure how we serialize them, but we probably use <code>markers</code> or <code>widgets</code> within codemirror to implement.  A first shot at this with no backend actually wouldn't be that hard.  But for backend ideas, search yammer for some of our previous discussions and projects we've found</li>
+          <li>Demosations - show demo with two editors next to each other (similar to <a href='http://ot.substance.io/visualization/'>this</a></li>
+          <li>Hook up keyboard shortcuts <a href='http://support.google.com/drive/bin/answer.py?hl=en&answer=179738'>http://support.google.com/drive/bin/answer.py?hl=en&answer=179738</a></li>
+          <li>List Handling</li>
+        </ul>
+
+        </div>
+    </div> <!-- /container -->
+
+    <script src="../js/jquery-1.9.1.js"></script>
+    <script src="../js/bootstrap.js"></script>
+
+  </body>
+</html>

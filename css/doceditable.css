@@ -1,0 +1,118 @@
+/*
+DocEditable v0.1
+https://github.com/foliotek/doceditable
+Copyright Foliotek Inc.
+May be distributed under the MIT license
+*/
+
+.DocEditable {
+	background: #eee;
+	padding: 20px;
+}
+
+.DocEditable .CodeMirror {
+	font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+	background: white;
+	font-size: 20px;
+	line-height: 1.65;
+	height: 250px;
+}
+.DocEditable .CodeMirror-linewidget {
+	overflow: visible;
+}
+.DocEditable div.CodeMirror-cursor {
+	-webkit-transition: top .05s, left .05s;
+	-moz-transition: top .05s, left .05s;
+	transition: top .05s, left .05s;
+}
+
+
+.DocEditable .annotation { background: rgb(255, 255, 153); }
+.DocEditable .annotation.active { background: orange; }
+.DocEditable .bold { font-weight: bold; }
+.DocEditable .italic { font-style: italic; }
+.DocEditable .underline { text-decoration: underline; }
+.DocEditable .strikethrough { text-decoration: line-through; }
+
+.DocEditable .unordered { padding-left: 20px; list-style-type: disc; }
+.DocEditable .unordered:before { content: "*"; display: block; position:absolute; left: 0; }
+/*
+.DocEditable .bullet { position:absolute; left: -20px; top: -20px; }
+*/
+
+.DocEditable.debug .wysi-start { border-left: solid 1px red; }
+.DocEditable.debug .wysi-start { border-left: solid 1px red; }
+.DocEditable.debug .wysi-end { border-right: solid 1px red; }
+.DocEditable.debug .bold.wysi-start, 
+.DocEditable.debug .bold.wysi-end { border-color: red; }
+.DocEditable.debug .bold.wysi-start:hover, 
+.DocEditable.debug .bold.wysi-end:hover { background: rgba(255, 0, 0, .2); }
+.DocEditable.debug .italic.wysi-start, 
+.DocEditable.debug .italic.wysi-end { border-color: green; }
+.DocEditable.debug .italic.wysi-start:hover, 
+.DocEditable.debug .italic.wysi-end:hover { background: rgba(0, 255, 0, .2); }
+.DocEditable.debug .underline.wysi-start, 
+.DocEditable.debug .underline.wysi-end { border-color: blue; }
+.DocEditable.debug .underline.wysi-start:hover, 
+.DocEditable.debug .underline.wysi-end:hover { background: rgba(0, 0, 255, .2); }
+
+.DocEditable .h1,
+.DocEditable .h2,
+.DocEditable .h3,
+.DocEditable .h4,
+.DocEditable .h5,
+.DocEditable .h6 {
+	text-rendering: optimizeLegibility;
+	line-height: 1;
+	margin-top: 0;
+	color: #222222;
+}
+
+.DocEditable .h1 {
+	font-size: 60px;
+	font-size: 3.33333rem;
+	border-bottom: solid 2px;
+	padding-bottom: 1px;
+}
+
+.DocEditable .h2 {
+	font-size: 48px;
+	font-size: 2.66667rem;
+}
+
+.DocEditable .h3 {
+	font-size: 36px;
+	font-size: 2rem;
+}
+
+.DocEditable .h4 {
+	font-size: 24px;
+	font-size: 1.33333rem;
+}
+
+.DocEditable .h5 {
+	font-size: 21px;
+	font-size: 1.16667rem;
+}
+
+.DocEditable .h6 {
+	font-size: 18px;
+	font-size: 1rem;
+}
+
+.DocEditable pre.li {
+	display: list-item;
+	list-style-type: decimal;
+	list-style-position: inside;
+}
+.DocEditable pre.li2 {
+	padding-left: 10px;
+}
+
+.DocEditable img {
+	width: auto	9;
+	height: auto;
+	max-width: 100%;
+	vertical-align: middle;
+	-ms-interpolation-mode: bicubic;
+}

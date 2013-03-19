@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Template &middot; Bootstrap</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <link href="../css/codemirror.css" rel="stylesheet">
+    <link href="../css/doceditable.css" rel="stylesheet">
+
+    <style type="text/css">
+    	.CodeMirror {
+    		border: 1px solid #333;
+    	}
+	</style>
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="../">Home</a></li>
+          <li><a href="../doc/">Documentation</a></li>
+          <li class="active"><a href=".">Demos</a></li>
+          <li><a href="../test/">Tests</a></li>
+          <li><a href="https://github.com/Foliotek/DocEditable">Github</a></li>
+        </ul>
+        <h1 class="muted">DocEditable</h1>
+      </div>
+
+      <hr>
+
+  	<h2>Demos</h2>
+  	<div class="row-fluid marketing">
+    	<div class="span12">
+
+		</div>
+  	</div>
+    	<div class="row-fluid marketing">
+      	<div class="span12">
+            <h4>Markdown Support</h4>
+<textarea id="markdown1" name="markdown1">
+## Heading
+Render **m*a*r*k*down** here
+
+test
+</textarea>
+
+  		</div>
+  	</div>
+
+    <h3>Experimental Demos (will break)</h3>
+    <ul>
+        <li><a href='ot.html'>Operational Transformation</a></li>
+    </ul>
+
+    <script src="../js/jquery-1.9.1.js"></script>
+    <script src="../js/codemirror.js"></script>
+    <script src="../js/doceditable.js"></script>
+    <script src="../js/bootstrap.js"></script>
+    <script src="../js/markdown.js"></script>
+    
+    <script>
+    $(function() {
+
+      var md = DocEditable.fromTextArea(document.getElementById("markdown1"), {
+        loadMarkdown: true
+      });
+
+    });
+    </script>
+
+  </body>
+</html>

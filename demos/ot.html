@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Template &middot; Bootstrap</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <link href="../css/codemirror.css" rel="stylesheet">
+    <link href="../css/doceditable.css" rel="stylesheet">
+
+    <style type="text/css">
+    	.CodeMirror {
+    		border: 1px solid #333;
+    	}
+	</style>
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="../">Home</a></li>
+          <li><a href="../doc/">Documentation</a></li>
+          <li class="active"><a href=".">Demos</a></li>
+          <li><a href="../test/">Tests</a></li>
+          <li><a href="https://github.com/Foliotek/DocEditable">Github</a></li>
+        </ul>
+        <h1 class="muted">DocEditable</h1>
+      </div>
+
+      <hr>
+
+  	<h2>Demosation</h2>
+  	<div class="row-fluid marketing">
+    	<div class="span12">
+  			<textarea id="primary" name="primary">This kind of works.  Backspace doesn't work though</textarea>
+		</div>
+  	</div>
+    	<div class="row-fluid marketing">
+      	<div class="span12">
+			<textarea id="secondary" name="secondary">This kind of works.  Backspace doesn't work though</textarea>
+  		</div>
+  	</div>
+
+    <script src="../js/jquery-1.9.1.js"></script>
+    <script src="../js/codemirror.js"></script>
+    <script src="../js/doceditable.js"></script>
+    <script src="../js/bootstrap.js"></script>
+    <script src="../js/ot.js"></script>
+    <script>
+        $(function() {
+            var n = 0;
+            var doc1 = DocEditable.fromTextArea(document.getElementById("primary"));
+            var doc2 = DocEditable.fromTextArea(document.getElementById("secondary"));
+            var cm2 = doc2.editor;
+            var cm1 = doc1.editor;
+            var cm1Adapter = new ot.CodeMirrorAdapter(cm1);
+            var cm2Adapter = new ot.CodeMirrorAdapter(cm2);
+
+            cm1Adapter.registerCallbacks({
+                'change': cm1Change,
+                'cursorActivity': cm1Cursor
+            });
+            cm2Adapter.registerCallbacks({
+                'change': cm2Change,
+                'cursorActivity': cm2Cursor
+            })
+
+            var cm1Curs = undefined,
+                cm2Curs = undefined;
+
+            function cm1Change(op) {
+                console.log("change", op, arguments)
+                cm2Adapter.applyOperation(op);
+            }
+            function cm1Cursor() {
+                if (cm1Curs) {
+                    cm1Curs.clear();
+                }
+                cm1Curs = cm2Adapter.setOtherCursor(cm1Adapter.getCursor(), '#bada55');
+            }
+            function cm2Change(op) {
+                cm1Adapter.applyOperation(op);
+            }
+            function cm2Cursor() {
+                if (cm2Curs) {
+                    cm2Curs.clear();
+                }
+                cm2Curs = cm1Adapter.setOtherCursor(cm2Adapter.getCursor(), '#f1ae02');
+            }
+
+            doc1.on('markerChange', function(_, marker) {
+                if (!marker) return;
+                var pos = marker.find();
+                cm2.markText(pos.from, pos.to, marker);
+            });
+
+            doc2.on('markerChange', function(_, marker) {
+                if (!marker) return;
+                var pos = marker.find();
+                cm1.markText(pos.from, pos.to, marker);
+            });
+
+            window.cm1 = cm1Adapter;
+        });
+    </script>
+  </body>
+</html>
