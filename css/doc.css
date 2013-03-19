@@ -27,6 +27,15 @@ body {
   padding: 14px 24px;
 }
 
+.prop {
+  font-family: monospace;
+  padding-bottom: 4px;
+  border-bottom: solid 1px #ddd;
+}
+.desc {
+  margin-left: 40px;
+}
+
 /* Supporting marketing content */
 .marketing {
   margin: 60px 0;

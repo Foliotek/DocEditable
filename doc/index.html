@@ -18,10 +18,10 @@
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
           <li><a href="../">Home</a></li>
-          <li class="active"><a href=".">Documentation</a></li>
+          <li><a href="../doc/">Documentation</a></li>
           <li><a href="../demos/">Demos</a></li>
-          <li><a href="../test/">Tests</a></li>
-          <li><a href="../">Github</a></li>
+          <li class="active"><a href=".">Tests</a></li>
+          <li><a href="https://github.com/Foliotek/DocEditable">Github</a></li>
         </ul>
         <h1 class="muted">DocEditable</h1>
       </div>
@@ -31,7 +31,7 @@
       <h2>Documentation</h2>
 
       <p>
-        Note: <strong>DocEditable is in an early stage of development</strong>.  Right now there may be some things that don't work, and the API may be changing.  Please contribute if you'd like to help out.  Send me an email at brian@foliotek.com or open an issue over at <a href='https://github.com/Foliotek/DocEditable/issues'>https://github.com/Foliotek/DocEditable/issues</a> if you'd like to help!
+        Note: <strong>DocEditable is in an early stage of development</strong>.  Right now there may be some things that don't work, and the API may be changing.  Please contribute if you'd like to help out!  Send me an email at brian@foliotek.com or open an issue over at <a href='https://github.com/Foliotek/DocEditable/issues'>https://github.com/Foliotek/DocEditable/issues</a> if you'd like to help!
       </p>
 
 
@@ -92,22 +92,53 @@ var docEditable3 = DocEditable(myCodeMirror, options);
 </pre>
 
       <h3>Options</h3>
-  
-      <div class="row-fluid marketing">
-        <div class="span12">
 
-        <h4>Todo:</h4>
-        <ul>
-          <li>Implement range splitting and merging for inline styles</li>
-          <li>toHtml, fromHtml, toMarkdown, fromMarkdown</li>
-          <li>Write some basic tests to check API and basic I/O</li>
-          <li>Annotations!  Not sure how we serialize them, but we probably use <code>markers</code> or <code>widgets</code> within codemirror to implement.  A first shot at this with no backend actually wouldn't be that hard.  But for backend ideas, search yammer for some of our previous discussions and projects we've found</li>
-          <li>Demosations - show demo with two editors next to each other (similar to <a href='http://ot.substance.io/visualization/'>this</a></li>
-          <li>Hook up keyboard shortcuts <a href='http://support.google.com/drive/bin/answer.py?hl=en&answer=179738'>http://support.google.com/drive/bin/answer.py?hl=en&answer=179738</a></li>
-          <li>List Handling</li>
-        </ul>
+      <div class="opt">
+        <p class="prop" id="options-format">
+        format (string)
+        </p>
+        <div class="desc">
+          <p>
+          The format to load the value within the editor as.  Possible values are <code>html</code> and <code>markdown</code>  This will process the value through <code>DocEditable.importers[format]</code>.  Read more about <a href='#importers'>importers</a>.
+        </p>
 
+<pre class="prettyprint language-js">
+var markdownEditable = DocEditable.fromTextArea(document.getElementById("doc"), {
+  format: 'markdown'
+});
+</pre>
         </div>
+      </div>
+
+      <h3>Methods</h3>
+
+
+      <h3>Customization</h3>
+
+<pre id="importers">
+DocEdtiable.importers
+</pre>
+<p class="desc">
+  Specificy a custom formatter
+</p>
+
+      <h3>Roadmap</h3>
+      
+      <p>
+        This project is getting started, and there is a lot to still do.  Here are some things on the list.  Again, contact me if you'd like to talk about this.
+      </p>
+
+      <ul>
+        <li><s>Implement block formatting (headers, normal text).</s></li>
+        <li><s>Implement range splitting and merging for inline styles.</s></li>
+        <li>Define import / export spec so we can support more formats (beyond html, markdown, and plain text).</li>
+        <li>Expand basic tests to check API and basic I/O.  The <a href='http://foliotek.github.com/DocEditable/test/'>tests live here</a>.</li>
+        <li>Annotations.  A way to store extra text as markers (similar to 'comments' on Google Docs)</li>
+        <li>Hook up more keyboard shortcuts: <a href='http://support.google.com/drive/bin/answer.py?hl=en&answer=179738'>http://support.google.com/drive/bin/answer.py?hl=en&answer=179738</a></li>
+        <li>Demonstrations - show demo with two editors next to each other with operational transforms (similar to <a href='http://ot.substance.io/visualization/'>this</a>.</li>
+        <li>List Handling</li>
+      </ul>
+
     </div> <!-- /container -->
 
     <script src="../js/jquery-1.9.1.js"></script>

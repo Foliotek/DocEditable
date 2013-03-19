@@ -23,92 +23,20 @@ window.DocEditable = (function() {
     editor.setOption("lineNumbers", false);
     editor.setOption("lineWrapping", true);
 
-    if (!options) {
-      options = { };
-    }
+    this.emitter = $("<div />");
+    this.options = options = options || { };
 
     var json = { value: this.editor.getValue() };
 
-    if (options.loadMarkdown) {
-      json = DocEditable.importers.markdown(json.value);
-    }
-    else if (options.loadHtml) {
-      json = DocEditable.importers.html(json.value);
+    if (options.format) {
+      if (!DocEditable.importers.hasOwnProperty(options.format)) {
+        throw "DocEditable: No importer for " + options.format;
+      }
+
+      json = DocEditable.importers[options.format](json.value);
     }
 
     this.loadJSON(json);
-    this.emitter = $("<div />");
-
-    var that = this;
-
-    var lastPos = {line: 0, ch: 0};
-    this.editor.on("cursorActivity", function() {
-      that.emitter.trigger("cursorActivity");
-      lastPos = that.editor.getCursor("head");
-    });
-
-    var isInList = false;
-    var isNestingList = false;
-    this.editor.on("change", function() {
-      that.emitter.trigger("change");
-
-      if (isInList) {
-        that.list();
-      }
-/*
-      if (isNestingList) {
-        that.list(undefined, true);
-      }
-      */
-    });
-
-    this.editor.on("beforeSelectionChange", function(ed, args) {
-      var start = args.head;
-      var end = { line: args.head.line, ch: args.head.ch + 1};
-      var character = editor.getRange(start, end);
-
-      // Remove marked spans that were added but never used
-      clearEmptyMarkedSpans(editor.getLineHandle(args.head.line).markedSpans, args.head.ch);
-
-      if (character === LIST_SENTRY) {
-        if (posLess(lastPos, args.head)) {
-          args.head.ch = args.head.ch + 1;
-        }
-        else {
-          var prevLine = editor.getLineHandle(args.head.line - 1);
-          if (prevLine) {
-            args.head.line = args.head.line - 1;
-            args.head.ch = prevLine.text.length;
-          }
-        }
-      }
-    });
-
-    this.editor.on("beforeChange", function(ed, args) {
-      var line = editor.getLineHandle(args.from.line);
-      var lineInfo = editor.lineInfo(line);
-      var lineClass = lineInfo.textClass || "";
-
-      isInList = false;
-      isNestingList = false;
-/*
-      log(args.text);
-      if (args.origin === "+input" && args.text.length == 2) {
-        isInList = lineClass.indexOf('li') !== -1;
-      }
-      else if ((lineClass.indexOf('li') !== -1) && args.text[0] === "\t") {
-        isNestingList = true;
-      }
-*/
-      if (args.origin === "+input" && args.text.length == 2) {
-        isInList = line.text.indexOf(LIST_SENTRY) !== -1;
-      }
-
-
-      //log(isInList, args, line);
-      //log("before " + arguments);
-    });
-
 
     var cloned = { };
     var keyMap = DocEditable.keyMap;
@@ -130,8 +58,84 @@ window.DocEditable = (function() {
 
     this.editor.refresh();
 
+    bindListEvents(this);
+
   }
   
+
+  function bindListEvents(docEditable) {
+
+    var editor = docEditable.editor;
+    var lastPos = {line: 0, ch: 0};
+    editor.on("cursorActivity", function() {
+      docEditable.emitter.trigger("cursorActivity");
+      lastPos = docEditable.editor.getCursor("head");
+    });
+
+    var isInList = false;
+    var isNestingList = false;
+    editor.on("change", function() {
+      docEditable.emitter.trigger("change");
+
+      if (isInList) {
+        docEditable.list();
+      }
+/*
+      if (isNestingList) {
+        docEditable.list(undefined, true);
+      }
+      */
+    });
+
+    editor.on("beforeSelectionChange", function(ed, args) {
+      var start = args.head;
+      var end = { line: args.head.line, ch: args.head.ch + 1};
+      var character = editor.getRange(start, end);
+
+      // Remove marked spans that were added but never used
+      clearEmptyMarkedSpans(editor.getLineHandle(args.head.line).markedSpans, args.head.ch);
+
+      if (character === LIST_SENTRY) {
+        if (posLess(lastPos, args.head)) {
+          args.head.ch = args.head.ch + 1;
+        }
+        else {
+          var prevLine = editor.getLineHandle(args.head.line - 1);
+          if (prevLine) {
+            args.head.line = args.head.line - 1;
+            args.head.ch = prevLine.text.length;
+          }
+        }
+      }
+    });
+
+    editor.on("beforeChange", function(ed, args) {
+      var line = editor.getLineHandle(args.from.line);
+      var lineInfo = editor.lineInfo(line);
+      var lineClass = lineInfo.textClass || "";
+
+      isInList = false;
+      isNestingList = false;
+/*
+      log(args.text);
+      if (args.origin === "+input" && args.text.length == 2) {
+        isInList = lineClass.indexOf('li') !== -1;
+      }
+      else if ((lineClass.indexOf('li') !== -1) && args.text[0] === "\t") {
+        isNestingList = true;
+      }
+*/
+      if (args.origin === "+input" && args.text.length == 2) {
+        isInList = line.text.indexOf(LIST_SENTRY) !== -1;
+      }
+
+      //log(isInList, args, line);
+      //log("before " + arguments);
+    });
+
+
+
+  }
   DocEditable.version = "0.1";
 
   DocEditable.tagMap = {
@@ -624,7 +628,6 @@ window.DocEditable = (function() {
 
   DocEditable.fromTextArea = function(textarea, options, cmOptions) {
 	  var editor = CodeMirror.fromTextArea(textarea, cmOptions);
-
     return new DocEditable(editor, options);
   };
 
@@ -682,58 +685,6 @@ window.DocEditable = (function() {
     DocEditable.keyMap = map;
   }
 
-
-
-  function log(){window.console&&(log=Function.prototype.bind?Function.prototype.bind.call(console.log,console):function(){Function.prototype.apply.call(console.log,console,arguments)},log.apply(this,arguments))};
-
-  function escapeHTMLEncode(str) {
-    var div = document.createElement('div');
-    var text = document.createTextNode(str);
-    div.appendChild(text);
-    return div.innerHTML;
-  }
-
-  function clearEmptyMarkedSpans(markedSpans, currentCh) {
-    (markedSpans || []).forEach(function(m) {
-      if (m.from === m.to && m.from !== currentCh) {
-        m.marker.clear();
-      }
-    });
-  }
-  function posEq(a, b) {
-    return a.line == b.line && a.ch == b.ch;
-  }
-  function posLess(a, b) {
-    return a.line < b.line || (a.line == b.line && a.ch < b.ch);
-  }
-  function intersects(start, end, pos) {
-    var intersects = (posEq(start, pos) || posLess(start, pos)) && (posEq(start, pos) || !posLess(pos, end));
-    //log(start, end, pos, posLess(start, pos), intersects);
-    return intersects;
-  }
-
-  function splice (s, idx, str) {
-      return (s.slice(0,idx) + str + s.slice(idx));
-  }
-
-  function markup (s, start, end, tag) {
-    var ret = '';
-    ret += s.slice(0, start);
-    ret += '<' + tag +'>' + s.slice(start, end) + '</' + tag +'>';
-    ret += s.slice(end);
-    return ret;
-  }
-
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-               .toString(16)
-               .substring(1);
-  }
-
-  function guid() {
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-           s4() + '-' + s4() + s4() + s4();
-  }
 
   DocEditable.exporters = {
     html: function(docEditable, lineBreaks) {
@@ -874,6 +825,57 @@ window.DocEditable = (function() {
       return DocEditable.importers.html(html);
     }
   };
+
+  function log(){window.console&&(log=Function.prototype.bind?Function.prototype.bind.call(console.log,console):function(){Function.prototype.apply.call(console.log,console,arguments)},log.apply(this,arguments))};
+
+  function escapeHTMLEncode(str) {
+    var div = document.createElement('div');
+    var text = document.createTextNode(str);
+    div.appendChild(text);
+    return div.innerHTML;
+  }
+
+  function clearEmptyMarkedSpans(markedSpans, currentCh) {
+    (markedSpans || []).forEach(function(m) {
+      if (m.from === m.to && m.from !== currentCh) {
+        m.marker.clear();
+      }
+    });
+  }
+  function posEq(a, b) {
+    return a.line == b.line && a.ch == b.ch;
+  }
+  function posLess(a, b) {
+    return a.line < b.line || (a.line == b.line && a.ch < b.ch);
+  }
+  function intersects(start, end, pos) {
+    var intersects = (posEq(start, pos) || posLess(start, pos)) && (posEq(start, pos) || !posLess(pos, end));
+    //log(start, end, pos, posLess(start, pos), intersects);
+    return intersects;
+  }
+
+  function splice (s, idx, str) {
+      return (s.slice(0,idx) + str + s.slice(idx));
+  }
+
+  function markup (s, start, end, tag) {
+    var ret = '';
+    ret += s.slice(0, start);
+    ret += '<' + tag +'>' + s.slice(start, end) + '</' + tag +'>';
+    ret += s.slice(end);
+    return ret;
+  }
+
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+               .toString(16)
+               .substring(1);
+  }
+
+  function guid() {
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+           s4() + '-' + s4() + s4() + s4();
+  }
 
   return DocEditable;
 

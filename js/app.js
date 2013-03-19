@@ -2,7 +2,7 @@ $(function() {
 
 
   var wysi = DocEditable.fromTextArea(document.getElementById("code"), {
-    loadHtml: true
+    format: 'html'
   });
 
   window.wysi = wysi;
