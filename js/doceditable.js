@@ -46,7 +46,7 @@ window.DocEditable = (function() {
 
     this.editor.addKeyMap(cloned);
 
-    this.toolbar = new DocEditableToolbar2(this);
+    this.toolbar = new DocEditableToolbar(this);
 
     var wrapper = $(this.editor.getWrapperElement());
     wrapper.wrap("<div class='DocEditable' />");
@@ -148,9 +148,9 @@ window.DocEditable = (function() {
 
   DocEditable.prototype = {
     loadJSON: function(json) {
-      this.setValue(json.value, json.markers);
+      this.setValue(json.value, json.markers,  json.blocks);
     },
-    setValue: function(val, markers) {
+    setValue: function(val, markers, blocks) {
 
       log("Loading value from markers: ", val, markers);
 
@@ -172,6 +172,13 @@ window.DocEditable = (function() {
         });
       }
 
+      var that = this;
+
+      if (blocks) {
+        blocks.forEach(function(b) {
+          that.formatBlock(b.className, b.start, b.end)
+        });
+      }
     },
     getValue: function() {
       return this.editor.getValue();
@@ -760,6 +767,7 @@ window.DocEditable = (function() {
       var el = $("<div />").append(markup)[0];
       var val = '';
       var markers = [];
+      var blocks = [];
 
       function processNode(n) {
         var next = n.childNodes[0];
@@ -789,13 +797,30 @@ window.DocEditable = (function() {
               ch: split[split.length - 1].length
             };
 
-            var className = "";
-            if (next.tagName === "STRONG") {className = "bold"; }
-            if (next.tagName === "EM") {className = "italic"; }
+            var markerClassName = "";
+            if (next.tagName === "STRONG") {markerClassName = "bold"; }
+            if (next.tagName === "EM") {markerClassName = "italic"; }
+            if (next.tagName === "U") {markerClassName = "underline"; }
 
-            if (className) {
+            var blockClassName = "";
+            if (next.tagName === "H1") {blockClassName = "h1"; }
+            if (next.tagName === "H2") {blockClassName = "h2"; }
+            if (next.tagName === "H3") {blockClassName = "h3"; }
+            if (next.tagName === "H4") {blockClassName = "h4"; }
+            if (next.tagName === "H5") {blockClassName = "h5"; }
+            if (next.tagName === "H6") {blockClassName = "h6"; }
+
+            if (markerClassName) {
               markers.push({
-                className: className,
+                className: markerClassName,
+                start: start,
+                end: end
+              });
+            }
+
+            if (blockClassName) {
+              blocks.push({
+                className: blockClassName,
                 start: start,
                 end: end
               });
@@ -810,7 +835,8 @@ window.DocEditable = (function() {
 
       return {
         value: val,
-        markers: markers
+        markers: markers,
+        blocks: blocks
       };
     },
     markdown: function(markup) {
@@ -881,31 +907,32 @@ window.DocEditable = (function() {
 
 })();
 
-
-window.DocEditableToolbar2 = (function() {
+window.DocEditableToolbar = (function() {
 
   var markup =
       '<div class="btn-toolbar">' +
       '  <div class="btn-group">' +
-      '      <button class="btn wys-mark wys-bold"  data-original-title="Bold - Ctrl+B"><i class="icon-bold"></i></button>' +
-      '      <button class="btn wys-mark wys-italic" data-original-title="Italic - Ctrl+I"><i class="icon-italic"></i></button>' +
-      '      <button class="btn wys-mark wys-underline" data-original-title="Underline - Ctrl+U"><i class="icon-magnet"></i></button>' +
+      '      <button class="btn wys-mark wys-bold"  title="Bold - Ctrl + B"><i class="icon-bold"></i></button>' +
+      '      <button class="btn wys-mark wys-italic" title="Italic - Ctrl + I"><i class="icon-italic"></i></button>' +
+      '      <button class="btn wys-mark wys-underline" title="Underline - Ctrl + U"><i class="icon-magnet"></i></button>' +
       '  </div>' +
 
       '  <div class="btn-group">' +
-      '      <button class="btn wys-block wys-h1" data-wysi-command="h1">H1</button>' +
-      '      <button class="btn wys-block wys-h2" data-wysi-command="h2">H2</button>' +
-      '      <button class="btn wys-block wys-h3" data-wysi-command="h3">H3</button>' +
-      '      <button class="btn wys-block wys-normal" data-wysi-command="normal">normal</button>' +
+      '      <button class="btn wys-block wys-h1" title="H1 - Ctrl + Alt + 1">H1</button>' +
+      '      <button class="btn wys-block wys-h2" title="H2 - Ctrl + Alt + 2">H2</button>' +
+      '      <button class="btn wys-block wys-h3" title="H3 - Ctrl + Alt + 3">H3</button>' +
+      '      <button class="btn wys-block wys-normal">normal</button>' +
       '  </div>' +
 
       '  <div class="btn-group">' +
-      '      <button class="btn wys-list wys-unordered" data-original-title="Insert List"><i class="icon-list"></i></button>' +
+      '      <button class="btn wys-list wys-unordered" title="Insert List"><i class="icon-list"></i></button>' +
       '  </div>' +
 
       '  <div class="btn-group">' +
-      '      <button class="btn wys-mark wys-remove" data-original-title="Remove Formatting - Ctrl+Space"><i class="icon-remove"></i></button>' +
+      '      <button class="btn wys-mark wys-remove" title="Remove Formatting - Ctrl + Space"><i class="icon-remove"></i></button>' +
       '  </div>' +
+      /* Temporarily disable annotations and images since they aren't really working
+
       '  <div class="btn-group">' +
       '      <button class="btn wys-mark wys-comment" data-original-title="Add Comment - Ctrl+Alt+M"><i class="icon-comment"></i></button>' +
       '  </div>' +
@@ -913,12 +940,13 @@ window.DocEditableToolbar2 = (function() {
       '    <button class="btn wys-image"><i class="icon-picture"></i></button>' +
       '    <button class="btn wys-image-inline"><i class="icon-picture"></i></button>' +
       '  </div>' +
+      */
       '</div>';
 
 
-  function DocEditableToolbar2(DocEditable) {
+  function DocEditableToolbar(DocEditable) {
 
-    if (!(this instanceof DocEditableToolbar2)) return new DocEditableToolbar2(DocEditable);
+    if (!(this instanceof DocEditableToolbar)) return new DocEditableToolbar(DocEditable);
 
 
     var el = this.el = $(markup);
@@ -985,7 +1013,7 @@ window.DocEditableToolbar2 = (function() {
   }
 
 
-  DocEditableToolbar2.prototype = {
+  DocEditableToolbar.prototype = {
     updateUI: function() {
       var el = this.el;
       var wysi = this.wysi;
@@ -1005,7 +1033,7 @@ window.DocEditableToolbar2 = (function() {
     }
   };
 
-  return DocEditableToolbar2;
+  return DocEditableToolbar;
 
 })();
 

@@ -21,9 +21,9 @@ May be distributed under the MIT license
 	overflow: visible;
 }
 .DocEditable div.CodeMirror-cursor {
-	-webkit-transition: top .02s, left .02s;
-	-moz-transition: top .02s, left .02s;
-	transition: top .02s, left .02s;
+	-webkit-transition: top .005s, left .005s;
+	-moz-transition: top .005s, left .005s;
+	transition: top .005s, left .005s;
 }
 
 
