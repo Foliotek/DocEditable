@@ -7,8 +7,6 @@ May be distributed under the MIT license
 
 window.DocEditable = (function() {
 
-  var LIST_SENTRY = "♂";
-
   function DocEditable(place, options) {
     if (!(this instanceof DocEditable)) return new DocEditable(place, options);
 
@@ -62,6 +60,11 @@ window.DocEditable = (function() {
 
   }
   
+  // The list events are currently handled by placing a character on the line designating it as a list item
+  // (and replacing that char with a bullet).  Not sure how well this will work as a long term solution when dealing
+  // with nesting and ordered lists, but it works OK for very simple cases.
+
+  var LIST_SENTRY = "♂";
 
   function bindListEvents(docEditable) {
 
