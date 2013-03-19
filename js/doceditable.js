@@ -189,7 +189,7 @@ window.DocEditable = (function() {
     toHTML: function(lineBreaks) {
       return DocEditable.exporters.html(this, lineBreaks);
     },
-  	removeFormatting: function(className, start, end) {
+    removeFormatting: function(className, start, end) {
 
       var editor = this.editor;
 
@@ -310,7 +310,7 @@ window.DocEditable = (function() {
         }
       });
 
-  	},
+    },
     bold: function(start, end) {
       this.formatText("bold", start, end);
     },
@@ -634,7 +634,7 @@ window.DocEditable = (function() {
   };
 
   DocEditable.fromTextArea = function(textarea, options, cmOptions) {
-	  var editor = CodeMirror.fromTextArea(textarea, cmOptions);
+    var editor = CodeMirror.fromTextArea(textarea, cmOptions);
     return new DocEditable(editor, options);
   };
 
