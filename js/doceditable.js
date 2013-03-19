@@ -131,9 +131,6 @@ window.DocEditable = (function() {
       if (args.origin === "+input" && args.text.length == 2) {
         isInList = line.text.indexOf(LIST_SENTRY) !== -1;
       }
-
-      //log(isInList, args, line);
-      //log("before " + arguments);
     });
 
 
@@ -205,6 +202,42 @@ window.DocEditable = (function() {
       //   return;
       // }
 
+
+      // Split all the ranges into multiline.  This prevents us from removing multiline markers on other lines.
+      // This should be replaced with CodeMirror's detachLine once that is implemented if possible
+      editor.eachLine(start.line, end.line + 1, function(l) {
+
+          (l.markedSpans || []).forEach(function(m) {
+            var pos = m.marker.find();
+            var opts = m.marker.getOptions();
+            var start = pos.from;
+            var end = pos.to;
+
+            log(start.line, end.line, opts)
+
+            if (end.line !== start.line) {
+
+              for (var k = start.line; k <= end.line; k++) {
+                var text = editor.getLine(k);
+
+                var startCh = k === start.line ? start.ch : 0;
+                var endCh = k === end.line ? end.ch : text.length;
+
+                editor.markText(
+                  { line: k, ch: startCh },
+                  { line: k, ch: endCh },
+                  opts
+                );
+                
+              }
+
+              m.marker.clear();
+            
+            }
+
+          });
+      });
+
       editor.eachLine(start.line, end.line + 1, function(l) {
 
           var startCh = i === start.line ? start.ch : 0;
@@ -243,7 +276,7 @@ window.DocEditable = (function() {
             var selectionStartsBefore = startCh <= from;
             var selectionEndsAfter = endCh >= to;
 
-            log(from, to, startCh, endCh);
+            log(m.marker, from, to, startCh, endCh);
 
             // Selected range encompasses marker.  Delete the marker
             if (selectionStartsBefore && selectionEndsAfter) {
@@ -866,7 +899,7 @@ window.DocEditable = (function() {
 
   function clearEmptyMarkedSpans(markedSpans, currentCh) {
     (markedSpans || []).forEach(function(m) {
-      if (m.from === m.to && m.from !== currentCh) {
+      if (m.from === m.to && m.from !== currentCh && m.marker.lines === 1) {
         m.marker.clear();
       }
     });
@@ -879,7 +912,6 @@ window.DocEditable = (function() {
   }
   function intersects(start, end, pos) {
     var intersects = (posEq(start, pos) || posLess(start, pos)) && (posEq(start, pos) || !posLess(pos, end));
-    //log(start, end, pos, posLess(start, pos), intersects);
     return intersects;
   }
 
