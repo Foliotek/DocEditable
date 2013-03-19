@@ -213,8 +213,6 @@ window.DocEditable = (function() {
             var start = pos.from;
             var end = pos.to;
 
-            log(start.line, end.line, opts)
-
             if (end.line !== start.line) {
 
               for (var k = start.line; k <= end.line; k++) {
@@ -232,7 +230,6 @@ window.DocEditable = (function() {
               }
 
               m.marker.clear();
-            
             }
 
           });
