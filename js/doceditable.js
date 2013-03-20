@@ -416,6 +416,7 @@ window.DocEditable = (function() {
       img.src = src;
     },
 
+
     linesAreList: function(start, end) {
       var allList = true;
 
@@ -480,26 +481,39 @@ window.DocEditable = (function() {
       this.reorderLists();
     },
 
+    getAllLists: function(className) {
+      
+      var editor = this.editor;
+      var lists = [];
+      var prevLine = -2;
+
+      editor.getAllMarks().forEach(function(m) {
+
+        if (m.className === "ordered" || m.className == "unordered" && (!className || m.className === className)) {
+
+          var to = m.find().to;
+          if (prevLine != to.line - 1) {
+            lists.push( { markers: [], type: m.className } );
+          }
+
+          lists[lists.length-1].markers.push(m);
+          prevLine = to.line;
+        }
+
+      });
+
+      return lists;
+    },
+
     reorderLists: function() {
 
       var editor = this.editor;
 
-      var prevBefore = 1;
-      var prevLine = 0;
-      editor.getAllMarks().forEach(function(m) {
-
-        if (m.className === "ordered") {
-
-          var to = m.find().to;
-          if (prevLine != to.line - 1) {
-            prevBefore = 1;
-          }
-          prevLine = to.line;
-
-          m.replacedWith.innerHTML = "&nbsp;&nbsp;" + prevBefore + ".&nbsp;&nbsp;";
-          prevBefore++;
-          //log(m, m.start,  m.replacedWith.className.indexOf("ordered"));
-        }
+      this.getAllLists("ordered").forEach(function(l) {
+        var prevBefore = 1;
+        l.markers.forEach(function(m, i) {
+          m.replacedWith.innerHTML = "&nbsp;&nbsp;" + (i+1) + ".&nbsp;&nbsp;";
+        });
       });
 
       editor.refresh();
@@ -674,6 +688,7 @@ window.DocEditable = (function() {
       this.emitter.trigger("cursorActivity");
       start['after'] = end['after'] = true;
       this.emitter.trigger("markerChange", marker);
+      this.emitter.trigger("change");
       //CodeMirror.signal(this.editor, 'change', this.editor, changeObj);
     },
     getActiveMarks: function() {
@@ -779,15 +794,27 @@ window.DocEditable = (function() {
       var markers = [];
       var out = [];
 
-      editor.getAllMarks().forEach(function(m) {
-        var markLocation = m.find();
-        var startLine = editor.getLineHandle(markLocation.from.line);
-        var endLine = editor.getLineHandle(markLocation.to.line);
+      docEditable.getAllLists().forEach(function(l) {
 
-        var markerID = guid();
-        var tag = DocEditable.tagMap[m.className];
+        var first = true;
+        var len = l.markers.length;
+        var listTag = l.type === "unordered" ? "ul" : "ol";
 
-        if (m.className === "ordered" || m.className === "unordered") {
+        l.markers.forEach(function(m, i) {
+
+          var markLocation = m.find();
+          var startLine = editor.getLineHandle(markLocation.from.line);
+          var endLine = editor.getLineHandle(markLocation.to.line);
+          var markerID = guid();
+
+          if (i === 0) {
+            markers.push({
+              id: markerID,
+              markerType: m.className,
+              tag: '<' + listTag + '>\n',
+              pos: markLocation.from
+            }); 
+          }
 
           markers.push({
             id: markerID,
@@ -802,6 +829,28 @@ window.DocEditable = (function() {
             tag: '</li>',
             pos: {line: markLocation.from.line, ch: startLine.text.length }
           });
+
+          if (i === len-1) {
+            markers.push({
+              id: markerID,
+              markerType: m.className,
+              tag: '\n</' + listTag + '>',
+              pos: {line: markLocation.from.line, ch: startLine.text.length }
+            });
+          }
+        });
+      });
+
+      editor.getAllMarks().forEach(function(m) {
+        var markLocation = m.find();
+        var startLine = editor.getLineHandle(markLocation.from.line);
+        var endLine = editor.getLineHandle(markLocation.to.line);
+
+        var markerID = guid();
+        var tag = DocEditable.tagMap[m.className];
+
+        if (m.className === "ordered" || m.className === "unordered") {
+
 
         }
 
