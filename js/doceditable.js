@@ -54,9 +54,8 @@ window.DocEditable = (function() {
       wrapper.parent().addClass("debug");
     }
 
-    this.editor.refresh();
-
     bindListEvents(this);
+    this.editor.refresh();
 
   }
 
@@ -68,11 +67,24 @@ window.DocEditable = (function() {
 
   function bindListEvents(docEditable) {
 
+
+
     var editor = docEditable.editor;
     var lastPos = {line: 0, ch: 0};
     editor.on("cursorActivity", function() {
       docEditable.emitter.trigger("cursorActivity");
       lastPos = docEditable.editor.getCursor("head");
+    });
+
+    // https://groups.google.com/forum/?fromgroups=#!topic/codemirror/oag8nhmJX20
+    editor.on("renderLine", function(cm, line, elt) {
+      var ind = line.text.indexOf(LIST_SENTRY);
+      if (ind !== -1) {
+        var basePadding = 30;
+        var off = 15; 
+        elt.style.textIndent = "-" + off + "px";
+        elt.style.paddingLeft = (basePadding + off) + "px";
+      }
     });
 
     editor.addKeyMap({
