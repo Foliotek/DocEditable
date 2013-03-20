@@ -265,6 +265,9 @@ window.DocEditable = (function() {
           (l.markedSpans || []).forEach(function(m) {
 
             var matchesClass = !className || m.marker.className === className;
+            if (m.marker.className === "ordered" || m.marker.className === "unordered") {
+              matchesClass = false;
+            }
             var markerOpts = m.marker.getOptions();
             var markerOptsNotInclusive = m.marker.getOptions();
             markerOptsNotInclusive.inclusiveLeft = markerOptsNotInclusive.inclusiveRight = false;
