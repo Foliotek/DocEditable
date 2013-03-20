@@ -394,7 +394,7 @@ window.DocEditable = (function() {
     strikethrough: function(start, end) {
       this.formatText("strikethrough", start, end);
     },
-    img: function(src) {
+    img: function(src, inline) {
 
       if (!src) {
         throw "DocEditable: img - no src provided"
@@ -405,9 +405,12 @@ window.DocEditable = (function() {
       var start = editor.getCursor("start");
 
       img.onload = function() {
-
-        editor.addLineWidget(start.line, img);
-
+        if (inline) {
+          editor.addWidget(start, img);
+        }
+        else {
+          editor.addLineWidget(start.line, img);
+        }
       };
 
       img.src = src;
@@ -1019,6 +1022,7 @@ window.DocEditableToolbar = (function() {
       '    <button class="btn wys-image"><i class="icon-picture"></i></button>' +
       '    <button class="btn wys-image-inline"><i class="icon-picture"></i></button>' +
       '  </div>' +
+      
       */
       '</div>';
 
@@ -1082,8 +1086,7 @@ window.DocEditableToolbar = (function() {
     });
 
 
-
-    el.on('mousedown', '.wys-image', function() {
+    el.on('mousedown', '.wys-image-inline', function() {
       wysi.img("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThWt73adaSgX55Rgi46CVKmdUWoCRFoUVAANI9q0QOA9f31qSx");
       return false;
     });
