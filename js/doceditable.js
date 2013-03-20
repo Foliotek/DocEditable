@@ -776,7 +776,6 @@ window.DocEditable = (function() {
   DocEditable.exporters = {
     html: function(docEditable, lineBreaks) {
       var editor = docEditable.editor;
-      var val = editor.getValue();
       var markers = [];
       var out = [];
 
@@ -788,19 +787,39 @@ window.DocEditable = (function() {
         var markerID = guid();
         var tag = DocEditable.tagMap[m.className];
 
-        markers.push({
-          id: markerID,
-          markerType: m.className,
-          tag: '<' + tag + '>',
-          pos: markLocation.from
-        });
+        if (m.className === "ordered" || m.className === "unordered") {
 
-        markers.push({
-          id: markerID,
-          markerType: m.className,
-          tag: '</' + tag + '>',
-          pos: markLocation.to
-        });
+          markers.push({
+            id: markerID,
+            markerType: m.className,
+            tag: '<li>',
+            pos: markLocation.from
+          }); 
+
+          markers.push({
+            id: markerID,
+            markerType: m.className,
+            tag: '</li>',
+            pos: {line: markLocation.from.line, ch: startLine.text.length }
+          });
+
+        }
+
+        else {
+          markers.push({
+            id: markerID,
+            markerType: m.className,
+            tag: '<' + tag + '>',
+            pos: markLocation.from
+          }); 
+
+          markers.push({
+            id: markerID,
+            markerType: m.className,
+            tag: '</' + tag + '>',
+            pos: markLocation.to
+          });
+        }
       });
 
 
@@ -835,7 +854,10 @@ window.DocEditable = (function() {
         out.push(lineVal);
       });
 
-      return out.join(lineBreaks || '<br />');
+      var output = out.join(lineBreaks || '<br />');
+      var rep = new RegExp(LIST_SENTRY, "g");
+      output = output.replace(rep, "");
+      return output;
     },
     markdown: function() {
       throw "Not implemented: exporters.markdown";
