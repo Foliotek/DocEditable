@@ -100,15 +100,6 @@ May be distributed under the MIT license
 	font-size: 1rem;
 }
 
-.DocEditable pre.li {
-	display: list-item;
-	list-style-type: decimal;
-	list-style-position: inside;
-}
-.DocEditable pre.li2 {
-	padding-left: 10px;
-}
-
 .DocEditable img {
 	width: auto	9;
 	height: auto;
