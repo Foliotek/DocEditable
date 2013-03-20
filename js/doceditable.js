@@ -102,6 +102,7 @@ window.DocEditable = (function() {
         docEditable.list(listType);
       }
 
+      docEditable.reorderLists();
     });
 
     editor.on("beforeSelectionChange", function(ed, args) {
