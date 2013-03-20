@@ -59,7 +59,7 @@ window.DocEditable = (function() {
     bindListEvents(this);
 
   }
-  
+
   // The list events are currently handled by placing a character on the line designating it as a list item
   // (and replacing that char with a bullet).  Not sure how well this will work as a long term solution when dealing
   // with nesting and ordered lists, but it works OK for very simple cases.
@@ -75,19 +75,33 @@ window.DocEditable = (function() {
       lastPos = docEditable.editor.getCursor("head");
     });
 
+    editor.addKeyMap({
+      "Tab": function() {
+        var start = editor.getCursor("start");
+        var end = editor.getCursor("end");
+        var allList = docEditable.linesAreList(start, end);
+        var coversLine = start.line < end.line || start.ch <= 1 && end.ch === editor.getLine(end.line).length;
+
+        if (allList && coversLine) {
+
+        }
+        else {
+          return CodeMirror.Pass;
+        }
+      }
+    });
+
     var isInList = false;
     var isNestingList = false;
+    var listType = "";
+
     editor.on("change", function() {
       docEditable.emitter.trigger("change");
 
       if (isInList) {
-        docEditable.list();
+        docEditable.list(listType);
       }
-/*
-      if (isNestingList) {
-        docEditable.list(undefined, true);
-      }
-      */
+
     });
 
     editor.on("beforeSelectionChange", function(ed, args) {
@@ -98,6 +112,7 @@ window.DocEditable = (function() {
       // Remove marked spans that were added but never used
       clearEmptyMarkedSpans(editor.getLineHandle(args.head.line).markedSpans, args.head.ch);
 
+      // Move cursor over the list character so typing doesn't happen in front of it
       if (character === LIST_SENTRY) {
         if (posLess(lastPos, args.head)) {
           args.head.ch = args.head.ch + 1;
@@ -119,17 +134,15 @@ window.DocEditable = (function() {
 
       isInList = false;
       isNestingList = false;
-/*
-      log(args.text);
+
       if (args.origin === "+input" && args.text.length == 2) {
-        isInList = lineClass.indexOf('li') !== -1;
-      }
-      else if ((lineClass.indexOf('li') !== -1) && args.text[0] === "\t") {
-        isNestingList = true;
-      }
-*/
-      if (args.origin === "+input" && args.text.length == 2) {
-        isInList = line.text.indexOf(LIST_SENTRY) !== -1;
+        isInList = line.text.indexOf(LIST_SENTRY) !== -1 && line.text.length > 1;
+        (line.markedSpans || []).forEach(function(m) {
+          var className = m.marker.className;
+          if (className === "ordered" || className === "unordered") {
+            listType = className;
+          }
+        });
       }
     });
 
@@ -176,7 +189,13 @@ window.DocEditable = (function() {
 
       if (blocks) {
         blocks.forEach(function(b) {
-          that.formatBlock(b.className, b.start, b.end)
+          if (b.className === "li") {
+            that.list("unordered", b.start, b.end);
+
+          }
+          else {
+            that.formatBlock(b.className, b.start, b.end);
+          }
         });
       }
     },
@@ -226,7 +245,7 @@ window.DocEditable = (function() {
                   { line: k, ch: endCh },
                   opts
                 );
-                
+
               }
 
               m.marker.clear();
@@ -398,20 +417,26 @@ window.DocEditable = (function() {
       return allList;
     },
 
-    list: function(type, nest) {
+    list: function(type, start, end) {
+
       var editor = this.editor;
 
+      start = start || editor.getCursor("start");
+      end = end || editor.getCursor("end");
+      log("list", start, end);
       type = type || "unordered";
-      var addClass = nest ? "li2" : "li";
-      if (nest) {
-        log("here", addClass);
-      }
 
-      var start = editor.getCursor("start");
-      var end = editor.getCursor("end");
+      var className = type === "unordered" ? "unordered" : "ordered"
+
+      /*if (nest) {
+      var addClass = nest ? "li2" : "li";
+        log("here", addClass);
+      }*/
+
       var allList = this.linesAreList(start, end);
       log("ALL? ", allList);
 
+      var listI = 1;
       for (var i = start.line; i <= end.line; i++)   {
         var rep = document.createElement("span");
         rep.innerHTML = "&nbsp;&nbsp;•&nbsp;&nbsp;";
@@ -427,36 +452,38 @@ window.DocEditable = (function() {
 
           editor.markText({line: i, ch: 0}, {line: i, ch: 1}, {
             replacedWith: rep,
-            className: "list"
+            className: className
           });
         }
 
-
-/*
-        var lineInfo = editor.lineInfo(line);
-        var isList = (lineInfo.textClass || "").indexOf(addClass) >= 0;
-
-        log('islist', isList);
-
-        if (allList && isList) {
-          editor.removeLineClass(i, "text", addClass);
-          //editor.indentLine(i, 'subtract');
-        }
-        else if (!isList) {
-          editor.addLineClass(i, "text", addClass);
-          //editor.indentLine(i, 'add');
-        }
-*/
-
-        //editor.addLineClass(i, "text", type);
-
-        /*var span = document.createElement("span");
-        span.className = "bullet"
-        span.innerText = "hi";
-        var widge = editor.addLineWidget(i, span);
-        widge.changed();
-        editor.refresh();*/
       }
+
+      this.reorderLists();
+    },
+
+    reorderLists: function() {
+
+      var editor = this.editor;
+
+      var prevBefore = 1;
+      var prevLine = 0;
+      editor.getAllMarks().forEach(function(m) {
+
+        if (m.className === "ordered") {
+
+          var to = m.find().to;
+          if (prevLine != to.line - 1) {
+            prevBefore = 1;
+          }
+          prevLine = to.line;
+
+          m.replacedWith.innerHTML = "&nbsp;&nbsp;" + prevBefore + ".&nbsp;&nbsp;";
+          prevBefore++;
+          //log(m, m.start,  m.replacedWith.className.indexOf("ordered"));
+        }
+      });
+
+      editor.refresh();
     },
 
     formatBlock: function(className, start, end) {
@@ -464,8 +491,8 @@ window.DocEditable = (function() {
       this.unformatBlock();
 
       var editor = this.editor;
-      var start = start || editor.getCursor("start");
-      var end = end || editor.getCursor("end");
+      start = start || editor.getCursor("start");
+      end = end || editor.getCursor("end");
 
 
       for (var i = start.line; i <= end.line; i++) {
@@ -482,8 +509,9 @@ window.DocEditable = (function() {
     },
     unformatBlock: function(start, end) {
       var editor = this.editor;
-      var start = start || editor.getCursor("start");
-      var end = end || editor.getCursor("end");
+
+      start = start || editor.getCursor("start");
+      end = end || editor.getCursor("end");
 
       for (var i = start.line; i <= end.line; i++)   {
         editor.removeLineClass(i, "text");
@@ -843,6 +871,8 @@ window.DocEditable = (function() {
             if (next.tagName === "H5") {blockClassName = "h5"; }
             if (next.tagName === "H6") {blockClassName = "h6"; }
 
+            if (next.tagName === "LI") {blockClassName = "li"; }
+
             if (markerClassName) {
               markers.push({
                 className: markerClassName,
@@ -880,7 +910,7 @@ window.DocEditable = (function() {
       }
 
       var html = markdown.toHTML(markup);
-      
+
       return DocEditable.importers.html(html);
     }
   };
@@ -958,6 +988,7 @@ window.DocEditableToolbar = (function() {
 
       '  <div class="btn-group">' +
       '      <button class="btn wys-list wys-unordered" title="Insert List"><i class="icon-list"></i></button>' +
+      '      <button class="btn wys-list wys-ordered" title="Insert Ordered List"><i class="icon-th-list"></i></button>' +
       '  </div>' +
 
       '  <div class="btn-group">' +
@@ -1027,6 +1058,10 @@ window.DocEditableToolbar = (function() {
 
     el.on('mousedown', '.wys-unordered', function() {
       wysi.list("unordered");
+      return false;
+    });
+    el.on('mousedown', '.wys-ordered', function() {
+      wysi.list("ordered");
       return false;
     });
 
