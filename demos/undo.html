@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Undo - DocEditable</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <link href="../css/codemirror.css" rel="stylesheet">
+    <link href="../css/doceditable.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="../">Home</a></li>
+          <li><a href="../doc/">Documentation</a></li>
+          <li class="active"><a href=".">Demos</a></li>
+          <li><a href="../test/">Tests</a></li>
+          <li><a href="https://github.com/Foliotek/DocEditable">Github</a></li>
+        </ul>
+        <h1 class="muted">DocEditable</h1>
+      </div>
+
+      <hr>
+
+  	<h2>Undo/Redo</h2>
+  	<div class="row-fluid marketing">
+    	<div class="span12">
+<textarea id="primary" name="primary">
+<h2>Undo/Redo</h2>
+<b>As you add and remove marked ranges</b>,
+
+
+Type something here, the highlight this entire line and press Italic
+</textarea>
+		  </div>
+  	</div>
+
+    <script src="../js/jquery-1.9.1.js"></script>
+    <script src="../js/codemirror.js"></script>
+    <script src="../js/doceditable.js"></script>
+    <script src="../js/bootstrap.js"></script>
+    <script src="../js/ot.js"></script>
+    <script>
+        $(function() {
+            var n = 0;
+            var doc1 = DocEditable.fromTextArea(document.getElementById("primary"), { format: 'html'});
+        });
+    </script>
+  </body>
+</html>

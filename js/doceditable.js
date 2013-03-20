@@ -55,7 +55,9 @@ window.DocEditable = (function() {
     }
 
     bindListEvents(this);
-    this.editor.refresh();
+    
+    editor.clearHistory();
+    editor.refresh();
 
   }
 
@@ -949,8 +951,8 @@ window.DocEditable = (function() {
             };
 
             var markerClassName = "";
-            if (next.tagName === "STRONG") {markerClassName = "bold"; }
-            if (next.tagName === "EM") {markerClassName = "italic"; }
+            if (next.tagName === "STRONG" || next.tagName === "B") {markerClassName = "bold"; }
+            if (next.tagName === "EM"||next.tagName === "I") {markerClassName = "italic"; }
             if (next.tagName === "U") {markerClassName = "underline"; }
 
             var blockClassName = "";
