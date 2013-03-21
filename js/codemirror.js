@@ -739,7 +739,7 @@ window.CodeMirror = (function() {
     // Move the hidden textarea near the cursor to prevent scrolling artifacts
     var headPos = cursorCoords(cm, cm.doc.sel.head, "div");
     var wrapOff = getRect(display.wrapper), lineOff = getRect(display.lineDiv);
-    display.inputDiv.style.top = Math.max(0, Math.min(display.wrapper.clientHeight - 10,
+    display.inputDiv.style.top = Math.max(0, Math.min(display.wrapper.clientHeight - 20,
                                                       headPos.top + lineOff.top - wrapOff.top)) + "px";
     display.inputDiv.style.left = Math.max(0, Math.min(display.wrapper.clientWidth - 10,
                                                        headPos.left + lineOff.left - wrapOff.left)) + "px";
@@ -2088,6 +2088,7 @@ window.CodeMirror = (function() {
   // UPDATING
 
   function changeEnd(change) {
+    if (!change.text) return change.to;
     return Pos(change.from.line + change.text.length - 1,
                lst(change.text).length + (change.text.length == 1 ? change.from.ch : 0));
   }
@@ -3337,6 +3338,7 @@ window.CodeMirror = (function() {
     return name == "Ctrl" || name == "Alt" || name == "Shift" || name == "Mod";
   }
   function keyName(event, noShift) {
+    if (opera && event.keyCode == 34 && event["char"]) return false;
     var name = keyNames[event.keyCode];
     if (name == null || event.altGraphKey) return false;
     if (event.altKey) name = "Alt-" + name;
@@ -3572,6 +3574,10 @@ window.CodeMirror = (function() {
       marker.replacedWith = elt("span", [marker.replacedWith], "CodeMirror-widget");
     }
     if (marker.collapsed) sawCollapsedSpans = true;
+
+    if (marker.addToHistory)
+      addToHistory(doc, {from: from, to: to, origin: "markText"},
+                   {head: doc.sel.head, anchor: doc.sel.anchor}, NaN);
 
     var curLine = from.line, size = 0, collapsedAtStart, collapsedAtEnd, cm = doc.cm, updateMaxLine;
     doc.iter(curLine, to.line + 1, function(line) {
@@ -4488,8 +4494,8 @@ window.CodeMirror = (function() {
         replaceRange(this, text, Pos(line, 0), clipPos(this, Pos(line)));
     },
     removeLine: function(line) {
-      if (isLine(this, line))
-        replaceRange(this, "", Pos(line, 0), clipPos(this, Pos(line + 1, 0)));
+      if (line) replaceRange(this, "", clipPos(this, Pos(line - 1)), clipPos(this, Pos(line)));
+      else replaceRange(this, "", Pos(0, 0), clipPos(this, Pos(1, 0)));
     },
 
     getLineHandle: function(line) {if (isLine(this, line)) return getLine(this, line);},

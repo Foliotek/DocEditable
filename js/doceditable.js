@@ -325,7 +325,7 @@ window.DocEditable = (function() {
               editor.markText(
                 { line: i, ch: endCh },
                 { line: i, ch: to },
-                m.marker.getOptions()
+                markerOpts
               );
              // m.marker.clear();
             }
@@ -354,7 +354,7 @@ window.DocEditable = (function() {
               editor.markText(
                 { line: i, ch: endCh },
                 { line: i, ch: to },
-                m.marker.getOptions()
+                markerOpts
               );
 
               var opts = m.marker.getOptions();
@@ -667,9 +667,9 @@ window.DocEditable = (function() {
               editor.replaceRange("", { line: i, ch: startCh },  { line: i, ch: endCh + 1 });
             }
             else {
-
-            marker = editor.markText({line: i, ch: startCh},{line: i, ch: endCh}, markOpts);
-          }
+              markOpts.addToHistory = true;
+              marker = editor.markText({line: i, ch: startCh},{line: i, ch: endCh}, markOpts);
+            }
 
           i++;
 
