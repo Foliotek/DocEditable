@@ -92,9 +92,10 @@ window.CodeMirror = (function() {
   function makeDisplay(place, docStart) {
     var d = {};
 
-    var input = d.input = elt("textarea", null, null, "position: absolute; padding: 0; width: 1px; height: 1em; outline: none;");
+    var input = d.input = elt("input", null, null, "position: absolute; padding: 0; width: 1px; height: 1em; outline: none;");
     if (webkit) input.style.width = "1000px";
     else input.setAttribute("wrap", "off");
+   input.setAttribute("contentEditable", "true");
     // if border: 0; -- iOS fails to open keyboard (issue #1287)
     if (ios) input.style.border = "1px solid black";
     input.setAttribute("autocorrect", "off"); input.setAttribute("autocapitalize", "off");
@@ -1514,20 +1515,38 @@ window.CodeMirror = (function() {
       on(d.scroller, "drop", operation(cm, onDrop));
     }
     on(d.scroller, "paste", function(e){
+      console.log(e);
       if (eventInWidget(d, e)) return;
       focusInput(cm);
       fastPoll(cm);
     });
-    on(d.input, "paste", function() {
+    on(d.input, "paste", function(e) {
+      try {
+        var html = e.clipboardData.getData("text/html");
+        cm.state.pasteHTML = html;
+      }
+      catch(e) {}
+      console.log(cm.state.pasteHTML);
       cm.state.pasteIncoming = true;
       fastPoll(cm);
     });
 
     function prepareCopy() {
-      if (d.inaccurateSelection) {
+
+      var obj = {
+        canceled: false,
+        text: cm.getSelection(),
+        update: function(text) {
+          this.text = text;
+        }
+      };
+
+      var x = signal(cm, "prepareCopy", obj);
+
+      if (true || d.inaccurateSelection) {
         d.prevInput = "";
         d.inaccurateSelection = false;
-        d.input.value = cm.getSelection();
+        d.input.value = obj.text;
         selectInput(d.input);
       }
     }
@@ -4820,6 +4839,7 @@ window.CodeMirror = (function() {
     hist.undone.length = 0;
     var time = +new Date, cur = lst(hist.done);
 
+    signal(doc.cm, "addUndo");
     if (cur &&
         (hist.lastOp == opId ||
          hist.lastOrigin == change.origin && change.origin &&
@@ -4850,6 +4870,7 @@ window.CodeMirror = (function() {
       else
         hist.dirtyCounter++;
     }
+
     hist.lastTime = time;
     hist.lastOp = opId;
     hist.lastOrigin = change.origin;

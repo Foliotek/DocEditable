@@ -40,6 +40,17 @@ May be distributed under the MIT license
 .DocEditable .bullet { position:absolute; left: -20px; top: -20px; }
 */
 
+.DocEditable .lineclass-h1 { color: red; }
+.DocEditable .lineclass-h2 { color: blue; }
+.DocEditable .lineclass-h3 { color: green; }
+.DocEditable .lineclass-h4 { color: purple; }
+
+.DocEditable .h1 .line-marker { color: red; }
+.DocEditable .h2 .line-marker { color: blue; }
+.DocEditable .h3 .line-marker { color: green; }
+.DocEditable .h4 .line-marker { color: purple; } 
+.invis { display:none;}
+
 .DocEditable.debug .wysi-start { border-left: solid 1px red; }
 .DocEditable.debug .wysi-start { border-left: solid 1px red; }
 .DocEditable.debug .wysi-end { border-right: solid 1px red; }

@@ -21,6 +21,28 @@ window.DocEditable = (function() {
     editor.setOption("lineNumbers", false);
     editor.setOption("lineWrapping", true);
 
+    editor.setOption("onDragEvent", function(cm, e) {
+
+
+        var text = e.dataTransfer.getData("text/html");
+      log("drag called", text)
+      return true;
+        if (text) {
+          var curFrom = cm.doc.sel.from, curTo = cm.doc.sel.to;
+          setSelection(cm.doc, pos, pos);
+          if (cm.state.draggingText) replaceRange(cm.doc, "", curFrom, curTo, "paste");
+          cm.replaceSelection(text, null, "paste");
+          focusInput(cm);
+          onFocus(cm);
+        }
+
+    });
+
+    editor.on("prepareCopy", function(o) {
+      log("preparing", arguments);
+      o.update("<h2>" + o.text + "</h2>");
+      return true;
+    })
     this.emitter = $("<div />");
     this.options = options = options || { };
 
@@ -109,14 +131,44 @@ window.DocEditable = (function() {
     var isNestingList = false;
     var listType = "";
 
-    editor.on("change", function() {
-      docEditable.emitter.trigger("change");
+    var lineClasses = this.lineClasses = [];
 
+    editor.on("addUndo", function(cm, o) {
+      log("HERE");
+      lineClasses = [];
+      editor.eachLine(function (l) {
+        var info = editor.lineInfo(l);
+        lineClasses.push(info);
+      });
+
+    });
+
+
+    editor.on("change", function(cm, o) {
+
+      docEditable.emitter.trigger("change");
+      log(arguments);
       if (isInList) {
         docEditable.list(listType);
       }
 
       docEditable.reorderLists();
+      log(o.origin);
+      if (o.origin === "undo") {
+        var i = 0;
+        editor.eachLine(function (l) {
+          var info = editor.lineInfo(l);
+          var old = lineClasses[i];
+          log(old, old.textClass)
+          editor.removeLineClass(info, "text");
+          if (old.textClass) {
+            log("adding", lineClasses[i], info);
+            editor.addLineClass(info, "text", old.textClass);
+          }
+
+        });
+      }
+
     });
 
     editor.on("beforeSelectionChange", function(ed, args) {
@@ -529,15 +581,34 @@ window.DocEditable = (function() {
       start = start || editor.getCursor("start");
       end = end || editor.getCursor("end");
 
+      var replacer = document.createElement("span");
+      replacer.className = "line-marker";
+      replacer.textContent = "hi";
+      var opts = {
+          className: "lineclass-" + className,
+          collapsed: true,
+          replacedWith: replacer
+      };
+
 
       for (var i = start.line; i <= end.line; i++) {
         editor.addLineClass(i, "text", className);
+
+
+        //editor.replaceRange(" ", { line: i, ch: 0 });
+        //this.popHistory();
+        editor.setGutterMarker(i, "test", "her");
+        //editor.markText({line: i, ch: 0}, { line: i, ch: 1 }, opts);
+
+        //editor.replaceRange("", { line: i, ch: 0 },  { line: i, ch: 1 });
+        //this.popHistory();
+
       }
 
-      this.addUndoState(
-        { line: start.line - 1, ch: 0 },
-        { line: end.line + 1, ch: 0 }// editor.getLineHandle(end.line).text.length }
-      );
+      // this.addUndoState(
+      //   { line: start.line - 1, ch: 0 },
+      //   { line: end.line + 1, ch: 0 }// editor.getLineHandle(end.line).text.length }
+      // );
 
       this.emitter.trigger("cursorActivity");
       this.emitter.trigger("change");
@@ -550,6 +621,11 @@ window.DocEditable = (function() {
 
       for (var i = start.line; i <= end.line; i++)   {
         editor.removeLineClass(i, "text");
+        eachMarkedSpan(editor.getLineHandle(i), function(m, i) {
+          if (m.marker.className.indexOf("lineclass-") != -1) {
+            m.marker.clear();
+          }
+        });
       }
 
       this.emitter.trigger("cursorActivity");
@@ -1016,6 +1092,12 @@ window.DocEditable = (function() {
     var text = document.createTextNode(str);
     div.appendChild(text);
     return div.innerHTML;
+  }
+
+  function eachMarkedSpan(line, fn) {
+    (line.markedSpans || []).forEach(function(m, i) {
+      fn.apply(this, [m, i]);
+    });
   }
 
   function clearEmptyMarkedSpans(markedSpans, currentCh) {

@@ -68,7 +68,6 @@
                 cm2Curs = undefined;
 
             function cm1Change(op) {
-                console.log("change", op, arguments)
                 cm2Adapter.applyOperation(op);
             }
             function cm1Cursor() {
@@ -79,6 +78,7 @@
             }
             function cm2Change(op) {
                 cm1Adapter.applyOperation(op);
+                doc1.popHistory();
             }
             function cm2Cursor() {
                 if (cm2Curs) {
