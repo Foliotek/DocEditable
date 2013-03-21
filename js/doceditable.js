@@ -604,8 +604,9 @@ window.DocEditable = (function() {
 
       // By including one extra character in the undo state it wipes out markers.
       // Not ideal, but it kind of works.  Has bugs when selection starts near line edges
-      var customStart = {line: start.line, ch: Math.max(start.ch - 1, 0)};
+      var customStart = {line: Math.max(0, start.line), ch: Math.max(start.ch - 1, 0)};
       var customEnd = {line: end.line, ch: end.ch + 1};
+
 
       hist.done.push({
         anchorBefore: editor.getCursor("anchor"),
