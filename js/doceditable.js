@@ -639,8 +639,13 @@ window.DocEditable = (function() {
         this.removeFormatting(className, start, end);
       }
       else {
+
+        this.removeFormatting(className, start, end);
+
         var i = start.line;
         var allChsMarked = true;
+        var isCollapsed = posEq(start, end);
+        var popHistory = this.popHistory.bind(this);
 
         var markOpts = {
           className: className,
@@ -649,49 +654,45 @@ window.DocEditable = (function() {
           endStyle: "wysi-end"
         };
 
-        this.removeFormatting(className, start, end);
-        var isCollapsed = posEq(start, end);
-        //log("%cAbout to mark character.  Is collapsed? " + isCollapsed, "color:red");
+
         editor.eachLine(start.line, end.line + 1, function(l) {
 
-            var startCh = i === start.line ? start.ch : 0;
-            var endCh = i === end.line ? end.ch : l.text.length;
+          var startCh = i === start.line ? start.ch : 0;
+          var endCh = i === end.line ? end.ch : l.text.length;
 
 
-            if (isCollapsed) {
+          if (isCollapsed) {
 
-              // Create a blank space, mark that range, then remove the space.  Allow pressing bold when 0 characters are selected.
-              markOpts.inclusiveLeft = true;
-              editor.replaceRange(" ", { line: i, ch: startCh });
-              editor.markText({ line: i, ch: startCh }, { line: i, ch: endCh + 1 }, markOpts);
-              editor.replaceRange("", { line: i, ch: startCh },  { line: i, ch: endCh + 1 });
-            }
-            else {
-              markOpts.addToHistory = true;
-              marker = editor.markText({line: i, ch: startCh},{line: i, ch: endCh}, markOpts);
-            }
+            // Create a blank space, mark that range, then remove the space.  Allows pressing bold when 0 characters are selected.
+
+            markOpts.inclusiveLeft = true;
+            editor.replaceRange(" ", { line: i, ch: startCh });
+            popHistory();
+
+            editor.markText({ line: i, ch: startCh }, { line: i, ch: endCh + 1 }, markOpts);
+
+            editor.replaceRange("", { line: i, ch: startCh },  { line: i, ch: endCh + 1 });
+            popHistory();
+          }
+          else {
+            markOpts.addToHistory = true;
+            marker = editor.markText({line: i, ch: startCh},{line: i, ch: endCh}, markOpts);
+          }
 
           i++;
 
         });
-
-        /*
-        editor.markText(start, end, {
-          className: className,
-          inclusiveRight: true,
-          inclusiveLeft : true,
-          startStyle: "wysi-start",
-          endStyle: "wysi-end"
-        });
-        */
       }
-      this.addUndoState(start, end);
 
       this.emitter.trigger("cursorActivity");
-      start['after'] = end['after'] = true;
       this.emitter.trigger("markerChange", marker);
       this.emitter.trigger("change");
-      //CodeMirror.signal(this.editor, 'change', this.editor, changeObj);
+    },
+    popHistory: function( ){
+      var editor = this.editor;
+      var hist = editor.getHistory();
+      hist.done.pop();
+      editor.setHistory(hist);
     },
     getActiveMarks: function() {
       var editor = this.editor;
