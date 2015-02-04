@@ -1,0 +1,15 @@
+{
+  "name": "DocEditable",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Foliotek/DocEditable",
+  "authors": [
+    "Foliotek"
+  ],
+  "description": "Clean WYSIWYG editing in your browser",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "codemirror": "~4.12.0",
+    "jquery": "~2.1.3"
+  }
+}

@@ -120,23 +120,24 @@ window.DocEditable = (function() {
     });
 
     editor.on("beforeSelectionChange", function(ed, args) {
-      var start = args.head;
-      var end = { line: args.head.line, ch: args.head.ch + 1};
+      var head = args.ranges[0].head;
+      var start = head;
+      var end = { line: head.line, ch: head.ch + 1};
       var character = editor.getRange(start, end);
 
       // Remove marked spans that were added but never used
-      clearEmptyMarkedSpans(editor.getLineHandle(args.head.line).markedSpans, args.head.ch);
+      clearEmptyMarkedSpans(editor.getLineHandle(head.line).markedSpans, head.ch);
 
       // Move cursor over the list character so typing doesn't happen in front of it
       if (character === LIST_SENTRY) {
-        if (posLess(lastPos, args.head)) {
-          args.head.ch = args.head.ch + 1;
+        if (posLess(lastPos, head)) {
+          args.head.ch = head.ch + 1;
         }
         else {
-          var prevLine = editor.getLineHandle(args.head.line - 1);
+          var prevLine = editor.getLineHandle(head.line - 1);
           if (prevLine) {
-            args.head.line = args.head.line - 1;
-            args.head.ch = prevLine.text.length;
+            head.line = args.head.line - 1;
+            head.ch = prevLine.text.length;
           }
         }
       }
@@ -243,7 +244,6 @@ window.DocEditable = (function() {
 
           (l.markedSpans || []).forEach(function(m) {
             var pos = m.marker.find();
-            var opts = m.marker.getOptions();
             var start = pos.from;
             var end = pos.to;
 
@@ -258,7 +258,7 @@ window.DocEditable = (function() {
                 editor.markText(
                   { line: k, ch: startCh },
                   { line: k, ch: endCh },
-                  opts
+                  m.marker
                 );
 
               }
@@ -282,8 +282,8 @@ window.DocEditable = (function() {
             if (m.marker.className === "ordered" || m.marker.className === "unordered") {
               matchesClass = false;
             }
-            var markerOpts = m.marker.getOptions();
-            var markerOptsNotInclusive = m.marker.getOptions();
+            var markerOpts = m.marker;
+            var markerOptsNotInclusive = $.extend(true, {}, markerOpts);
             markerOptsNotInclusive.inclusiveLeft = markerOptsNotInclusive.inclusiveRight = false;
 
             var to = m.to;
@@ -349,16 +349,12 @@ window.DocEditable = (function() {
 
               log("Splitting Range In Two", endCh, to);
 
-              var opts2 = m.marker.getOptions();
-              opts2.inclusiveLeft = false;
               editor.markText(
                 { line: i, ch: endCh },
                 { line: i, ch: to },
                 markerOpts
               );
 
-              var opts = m.marker.getOptions();
-              opts.inclusiveRight = false;
               editor.markText(
                 { line: i, ch: from },
                 { line: i, ch: startCh },

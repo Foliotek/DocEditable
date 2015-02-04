@@ -4,3 +4,10 @@
 See the demo and docs: http://foliotek.github.com/DocEditable/
 
 See the project roadmap: https://github.com/Foliotek/DocEditable/wiki/DocEditable-Roadmap
+
+### To get started
+```
+npm install
+bower install
+grunt
+```
